@@ -40,7 +40,7 @@ public class TestingClickHouseServer
     // https://clickhouse.com/docs/whats-new/changelog#257
     public static final DockerImageName CLICKHOUSE_LATEST_IMAGE = CLICKHOUSE_IMAGE.withTag("25.7.7.68");   // EOL in 3 releases after 2025-07-24
     // https://clickhouse.com/docs/whats-new/changelog#253
-    public static final DockerImageName CLICKHOUSE_DEFAULT_IMAGE = CLICKHOUSE_IMAGE.withTag("25.3.6.56"); // EOL in 1 year after 2025-03-27
+    public static final DockerImageName CLICKHOUSE_DEFAULT_IMAGE = CLICKHOUSE_IMAGE.withTag("25.6.5.41"); // EOL in 1 year after 2025-03-27
 
     /**
      * <a href="https://docs.altinity.com/altinitystablebuilds/#altinity-stable-builds-life-cycle-table">Altinity Stable Builds Life-Cycle Table</a>

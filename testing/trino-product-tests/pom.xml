@@ -246,6 +246,12 @@
             <artifactId>clickhouse-jdbc</artifactId>
             <classifier>all</classifier>
             <scope>runtime</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.google.guava</groupId>
+                    <artifactId>listenablefuture</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>

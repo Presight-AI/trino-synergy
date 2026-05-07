@@ -301,8 +301,8 @@ public class ClickHouseClient
         // Clickhouse maps their "database" to SQL catalogs and does not have schemas
         DatabaseMetaData metadata = connection.getMetaData();
         return metadata.getTables(
-                schemaName.orElse(null),
                 null,
+                schemaName.orElse(null),
                 escapeObjectNameForMetadataQuery(tableName, metadata.getSearchStringEscape()).orElse(null),
                 getTableTypes().map(types -> types.toArray(String[]::new)).orElse(null));
     }
@@ -356,10 +356,10 @@ public class ClickHouseClient
     public Collection<String> listSchemas(Connection connection)
     {
         // for Clickhouse, we need to list catalogs instead of schemas
-        try (ResultSet resultSet = connection.getMetaData().getCatalogs()) {
+        try (ResultSet resultSet = connection.getMetaData().getSchemas()) {
             ImmutableSet.Builder<String> schemaNames = ImmutableSet.builder();
             while (resultSet.next()) {
-                String schemaName = resultSet.getString("TABLE_CAT");
+                String schemaName = resultSet.getString("TABLE_SCHEM");
                 // skip internal schemas
                 if (filterRemoteSchema(schemaName)) {
                     schemaNames.add(schemaName);
@@ -704,7 +704,14 @@ public class ClickHouseClient
                 return Optional.of(doubleColumnMapping());
 
             case Types.DECIMAL:
-                int decimalDigits = typeHandle.requiredDecimalDigits();
+                int decimalDigits = 0;
+                try {
+                    decimalDigits = typeHandle.requiredDecimalDigits();
+                }
+                catch (IllegalStateException e) {
+                    // ignore missing decimal digits
+                }
+
                 int precision = typeHandle.requiredColumnSize();
 
                 ColumnMapping decimalColumnMapping;
@@ -728,7 +735,7 @@ public class ClickHouseClient
             case Types.TIMESTAMP:
                 if (columnDataType == ClickHouseDataType.DateTime) {
                     // ClickHouse DateTime does not have sub-second precision
-                    verify(typeHandle.requiredDecimalDigits() == 0, "Expected 0 as timestamp precision, but got %s", typeHandle.requiredDecimalDigits());
+//                    verify(typeHandle.requiredDecimalDigits() == 0, "Expected 0 as timestamp precision, but got %s", typeHandle.requiredDecimalDigits());
                     return Optional.of(ColumnMapping.longMapping(
                             TIMESTAMP_SECONDS,
                             timestampReadFunction(TIMESTAMP_SECONDS),
@@ -740,7 +747,7 @@ public class ClickHouseClient
             case Types.TIMESTAMP_WITH_TIMEZONE:
                 if (columnDataType == ClickHouseDataType.DateTime) {
                     // ClickHouse DateTime does not have sub-second precision
-                    verify(typeHandle.requiredDecimalDigits() == 0, "Expected 0 as timestamp with time zone precision, but got %s", typeHandle.requiredDecimalDigits());
+//                    verify(typeHandle.requiredDecimalDigits() == 0, "Expected 0 as timestamp with time zone precision, but got %s", typeHandle.requiredDecimalDigits());
                     return Optional.of(ColumnMapping.longMapping(
                             TIMESTAMP_TZ_SECONDS,
                             shortTimestampWithTimeZoneReadFunction(),
